@@ -27,8 +27,8 @@
 #include <libxml/parser.h>
 #include <libxml/xmlversion.h>
 
-#include <gdal_priv.h>
-#include <ogr_api.h>
+//#include <gdal_priv.h>
+//#include <ogr_api.h>
 
 // mapnik
 #include <mapnik/config.hpp> // for MAPNIK_DECL
@@ -101,8 +101,9 @@ static NAN_METHOD(shutdown)
     google::protobuf::ShutdownProtobufLibrary();
     // http://lists.fedoraproject.org/pipermail/devel/2010-January/129117.html
     xmlCleanupParser();
-    GDALDestroyDriverManager();
-    OGRCleanupAll();
+    // disable ogr/gdal cleanup since it not viable to link or find gdal headers from node-mapnik - refs #251
+    //GDALDestroyDriverManager();
+    //OGRCleanupAll();
     NanReturnUndefined();
 }
 
