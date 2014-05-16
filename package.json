@@ -31,6 +31,7 @@
   "contributors": [
     "Konstantin Käfer"
   ],
+<<<<<<< HEAD
   "licenses": [
     {
       "type": "BSD",
@@ -41,6 +42,11 @@
     "mapnik-vector-tile": "0.4.2",
     "nan": "~1.1.2",
     "node-pre-gyp": "~0.5.0"
+=======
+  "dependencies"  : {
+      "mapnik-vector-tile": "https://github.com/mapbox/mapnik-vector-tile/tarball/raster",
+      "node-pre-gyp":"~0.5.0"
+>>>>>>> support encoding images in pbf
   },
   "bundledDependencies": [
     "mapnik-vector-tile",
