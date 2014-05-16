@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "mapnik",
   "description": "Tile rendering library for node",
   "url": "http://github.com/mapnik/node-mapnik",
@@ -6,6 +7,15 @@
   "author": "Dane Springmeyer <dane@dbsgeo.com> (mapnik.org)",
   "version": "1.4.3",
   "main": "./lib/mapnik.js",
+=======
+  "name"          : "mapnik",
+  "description"   : "Tile rendering library for node",
+  "url"           : "http://github.com/mapnik/node-mapnik",
+  "homepage"      : "http://mapnik.org",
+  "author"        : "Dane Springmeyer <dane@dbsgeo.com> (mapnik.org)",
+  "version"       : "1.4.3-raster-pbf",
+  "main"          : "./lib/mapnik.js",
+>>>>>>> [publish binary] for 1.4.3-raster-pbf
   "binary": {
     "module_name": "mapnik",
     "module_path": "./lib/binding/",
