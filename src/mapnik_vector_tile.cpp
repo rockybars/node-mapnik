@@ -1305,7 +1305,6 @@ NAN_METHOD(VectorTile::addImage)
     // cache modified size
     d->cache_bytesize();
     return NanUndefined();
-
 }
 
 NAN_METHOD(VectorTile::addGeoJSON)
@@ -1506,12 +1505,18 @@ NAN_METHOD(VectorTile::getData)
         // shortcut: return raw data and avoid trip through proto object
         // TODO  - safe for null string?
         int raw_size = d->buffer_.size();
+<<<<<<< HEAD
         if (d->byte_size_ <= raw_size) {
             NanReturnValue(NanNewBufferHandle((char*)d->buffer_.data(),raw_size));
+=======
+        if (raw_size > 0 && d->byte_size_ <= raw_size) {
+            return scope.Close(node::Buffer::New((char*)d->buffer_.data(),raw_size)->handle_);
+>>>>>>> fix internal knowledge of vtile cached size after vtile.addImage
         } else {
             // NOTE: tiledata.ByteSize() must be called
             // after each modification of tiledata otherwise the
-            // SerializeWithCachedSizesToArray will throw
+            // SerializeWithCachedSizesToArray will throw:
+            // Error: CHECK failed: !coded_out.HadError()
             mapnik::vector::tile const& tiledata = d->get_tile();
             Local<Object> retbuf = NanNewBufferHandle(d->byte_size_);
             // TODO - consider wrapping in fastbuffer: https://gist.github.com/drewish/2732711
