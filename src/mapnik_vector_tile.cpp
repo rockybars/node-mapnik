@@ -298,6 +298,7 @@ void VectorTile::parse_proto()
         if (tiledata_.ParseFromArray(buffer_.data(), bytes))
         {
             painted(true);
+            cache_bytesize();
         }
         else
         {
@@ -321,6 +322,7 @@ void VectorTile::parse_proto()
         if (tiledata_.MergeFromCodedStream(&input))
         {
             painted(true);
+            cache_bytesize();
         }
         else
         {
@@ -455,8 +457,8 @@ NAN_METHOD(VectorTile::composite)
             target_vt->x_ == vt->x_ &&
             target_vt->y_ == vt->y_)
         {
-            std::size_t bytes = vt->buffer_.size();
-            if (bytes > 0) {
+            int bytes = static_cast<int>(vt->buffer_.size());
+            if (bytes > 0 && vt->byte_size_ <= bytes) {
                 target_vt->buffer_.append(vt->buffer_.data(),vt->buffer_.size());
                 target_vt->status_ = VectorTile::LAZY_MERGE;
             }
@@ -1353,6 +1355,7 @@ NAN_METHOD(VectorTile::addGeoJSON)
                           m_req);
         ren.apply();
         d->painted(ren.painted());
+        d->cache_bytesize();
         NanReturnValue(NanTrue());
     }
     catch (std::exception const& ex)
@@ -1511,15 +1514,20 @@ NAN_METHOD(VectorTile::getData)
     try {
         // shortcut: return raw data and avoid trip through proto object
         // TODO  - safe for null string?
+<<<<<<< HEAD
         int raw_size = d->buffer_.size();
 <<<<<<< HEAD
         if (d->byte_size_ <= raw_size) {
             NanReturnValue(NanNewBufferHandle((char*)d->buffer_.data(),raw_size));
 =======
+=======
+        int raw_size = static_cast<int>(d->buffer_.size());
+>>>>>>> fixup internal handling of cached tile bytesize
         if (raw_size > 0 && d->byte_size_ <= raw_size) {
             return scope.Close(node::Buffer::New((char*)d->buffer_.data(),raw_size)->handle_);
 >>>>>>> fix internal knowledge of vtile cached size after vtile.addImage
         } else {
+<<<<<<< HEAD
             // NOTE: tiledata.ByteSize() must be called
             // after each modification of tiledata otherwise the
             // SerializeWithCachedSizesToArray will throw:
@@ -1535,6 +1543,27 @@ NAN_METHOD(VectorTile::getData)
                 NanReturnUndefined();
             }
             NanReturnValue(retbuf);
+=======
+            if (d->byte_size_ <= 0) {
+                return scope.Close(node::Buffer::New(0)->handle_);
+            } else {
+                // NOTE: tiledata.ByteSize() must be called
+                // after each modification of tiledata otherwise the
+                // SerializeWithCachedSizesToArray will throw:
+                // Error: CHECK failed: !coded_out.HadError()
+                mapnik::vector::tile const& tiledata = d->get_tile();
+                node::Buffer *retbuf = node::Buffer::New(d->byte_size_);
+                // TODO - consider wrapping in fastbuffer: https://gist.github.com/drewish/2732711
+                // http://www.samcday.com.au/blog/2011/03/03/creating-a-proper-buffer-in-a-node-c-addon/
+                google::protobuf::uint8* start = reinterpret_cast<google::protobuf::uint8*>(node::Buffer::Data(retbuf));
+                google::protobuf::uint8* end = tiledata.SerializeWithCachedSizesToArray(start);
+                if (end - start != d->byte_size_) {
+                    return ThrowException(Exception::Error(
+                                              String::New("serialization failed, possible race condition")));
+                }
+                return scope.Close(retbuf->handle_);
+            }
+>>>>>>> fixup internal handling of cached tile bytesize
         }
     } catch (std::exception const& ex) {
         NanThrowError(ex.what());
