@@ -24,12 +24,15 @@
 #endif
 #include "utils.hpp"
 
+<<<<<<< HEAD
 #include <libxml/parser.h>
 #include <libxml/xmlversion.h>
 
 //#include <gdal_priv.h>
 //#include <ogr_api.h>
 
+=======
+>>>>>>> Drop libxml2 init and cleanup
 // mapnik
 #include <mapnik/config.hpp> // for MAPNIK_DECL
 #include <mapnik/version.hpp>
@@ -99,11 +102,6 @@ static NAN_METHOD(shutdown)
 {
     NanScope();
     google::protobuf::ShutdownProtobufLibrary();
-    // http://lists.fedoraproject.org/pipermail/devel/2010-January/129117.html
-    xmlCleanupParser();
-    // disable ogr/gdal cleanup since it not viable to link or find gdal headers from node-mapnik - refs #251
-    //GDALDestroyDriverManager();
-    //OGRCleanupAll();
     NanReturnUndefined();
 }
 
@@ -113,11 +111,6 @@ extern "C" {
     {
         NanScope();
         GOOGLE_PROTOBUF_VERIFY_VERSION;
-        // https://mail.gnome.org/archives/xml/2007-October/msg00004.html
-        // calls http://xmlsoft.org/html/libxml-xmlversion.html#xmlCheckVersion
-        // which internall calls http://xmlsoft.org/html/libxml-parser.html#xmlInitParser
-        // see 'parserInternals.c' for details / requires xmlCleanupParser(); at exit
-        LIBXML_TEST_VERSION;
 
         // module level functions
         NODE_SET_METHOD(target, "register_datasource", node_mapnik::register_datasource);
@@ -155,6 +148,7 @@ extern "C" {
         CairoSurface::Initialize(target);
 
         // versions of deps
+<<<<<<< HEAD
         Local<Object> versions = NanNew<Object>();
         versions->Set(NanNew("node"), NanNew(NODE_VERSION+1)); // NOTE: +1 strips the v in v0.10.26
         versions->Set(NanNew("v8"), NanNew(V8::GetVersion()));
@@ -163,6 +157,15 @@ extern "C" {
         versions->Set(NanNew("mapnik"), NanNew(format_version(MAPNIK_VERSION).c_str()));
         versions->Set(NanNew("mapnik_number"), NanNew(MAPNIK_VERSION));
         versions->Set(NanNew("libxml"), NanNew(LIBXML_DOTTED_VERSION));
+=======
+        Local<Object> versions = Object::New();
+        versions->Set(String::NewSymbol("node"), String::New(NODE_VERSION+1)); // NOTE: +1 strips the v in v0.10.26
+        versions->Set(String::NewSymbol("v8"), String::New(V8::GetVersion()));
+        versions->Set(String::NewSymbol("boost"), String::New(format_version(BOOST_VERSION).c_str()));
+        versions->Set(String::NewSymbol("boost_number"), Integer::New(BOOST_VERSION));
+        versions->Set(String::NewSymbol("mapnik"), String::New(format_version(MAPNIK_VERSION).c_str()));
+        versions->Set(String::NewSymbol("mapnik_number"), Integer::New(MAPNIK_VERSION));
+>>>>>>> Drop libxml2 init and cleanup
 #if defined(HAVE_CAIRO)
         versions->Set(NanNew("cairo"), NanNew(CAIRO_VERSION_STRING));
 #endif
