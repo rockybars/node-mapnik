@@ -13,7 +13,7 @@
   "url"           : "http://github.com/mapnik/node-mapnik",
   "homepage"      : "http://mapnik.org",
   "author"        : "Dane Springmeyer <dane@dbsgeo.com> (mapnik.org)",
-  "version"       : "1.4.3-raster-pbf",
+  "version"       : "1.4.4",
   "main"          : "./lib/mapnik.js",
 >>>>>>> [publish binary] for 1.4.3-raster-pbf
   "binary": {
