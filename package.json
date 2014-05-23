@@ -54,7 +54,7 @@
     "node-pre-gyp": "~0.5.0"
 =======
   "dependencies"  : {
-      "mapnik-vector-tile": "https://github.com/mapbox/mapnik-vector-tile/tarball/raster",
+      "mapnik-vector-tile": "~0.5.0",
       "node-pre-gyp":"~0.5.0"
 >>>>>>> support encoding images in pbf
   },
