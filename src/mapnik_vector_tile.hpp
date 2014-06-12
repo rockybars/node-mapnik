@@ -20,7 +20,6 @@ public:
     };
     static Persistent<FunctionTemplate> constructor;
     static void Initialize(Handle<Object> target);
-<<<<<<< HEAD
     static NAN_METHOD(New);
     static NAN_METHOD(getData);
     static NAN_METHOD(render);
@@ -28,18 +27,8 @@ public:
     static NAN_METHOD(query);
     static NAN_METHOD(names);
     static NAN_METHOD(toGeoJSON);
-    static NAN_METHOD(fromGeoJSON);
-=======
-    static Handle<Value> New(Arguments const&args);
-    static Handle<Value> getData(Arguments const& args);
-    static Handle<Value> render(Arguments const& args);
-    static Handle<Value> toJSON(Arguments const& args);
-    static Handle<Value> query(Arguments const& args);
-    static Handle<Value> names(Arguments const& args);    
-    static Handle<Value> toGeoJSON(Arguments const& args);
-    static Handle<Value> addGeoJSON(Arguments const& args);
-    static Handle<Value> addImage(Arguments const& args);
->>>>>>> support for adding images from node.Buffer as raster layers
+    static NAN_METHOD(addGeoJSON);
+    static NAN_METHOD(addImage);
 #ifdef PROTOBUF_FULL
     static NAN_METHOD(toString);
 #endif

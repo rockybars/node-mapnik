@@ -140,23 +140,23 @@ void VectorTile::Initialize(Handle<Object> target) {
 
     NanScope();
 
-    Local<FunctionTemplate> constructor = NanNew<FunctionTemplate>(VectorTile::New);
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(NanNew("VectorTile"));
-    NODE_SET_PROTOTYPE_METHOD(constructor, "render", render);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "setData", setData);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "setDataSync", setDataSync);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "getData", getData);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "parse", parse);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "parseSync", parseSync);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "addData", addData);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "composite", composite);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "query", query);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "names", names);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "toJSON", toJSON);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "toGeoJSON", toGeoJSON);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "addGeoJSON", addGeoJSON);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "addImage", addImage);
+    Local<FunctionTemplate> lcons = NanNew<FunctionTemplate>(VectorTile::New);
+    lcons->InstanceTemplate()->SetInternalFieldCount(1);
+    lcons->SetClassName(NanNew("VectorTile"));
+    NODE_SET_PROTOTYPE_METHOD(lcons, "render", render);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "setData", setData);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "setDataSync", setDataSync);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "getData", getData);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "parse", parse);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "parseSync", parseSync);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "addData", addData);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "composite", composite);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "query", query);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "names", names);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "toJSON", toJSON);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "toGeoJSON", toGeoJSON);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "addGeoJSON", addGeoJSON);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "addImage", addImage);
 #ifdef PROTOBUF_FULL
     NODE_SET_PROTOTYPE_METHOD(lcons, "toString", toString);
 #endif
@@ -468,8 +468,8 @@ NAN_METHOD(VectorTile::composite)
                 mapnik::vector::tile const& tiledata = vt->get_tile();
                 if (!tiledata.SerializeToString(&new_message))
                 {
-                    return ThrowException(Exception::Error(
-                              String::New("could not serialize new data for vt")));
+                    NanThrowError("could not serialize new data for vt");
+                    NanReturnUndefined();
                 }
                 target_vt->buffer_.append(new_message.data(),new_message.size());
                 target_vt->status_ = VectorTile::LAZY_MERGE;
@@ -825,15 +825,15 @@ NAN_METHOD(VectorTile::toJSON)
             mapnik::vector::tile_feature const& f = layer.features(j);
             if (f.has_id())
             {
-                feature_obj->Set(NanNew<String>("id"),Number::New(f.id()));
+                feature_obj->Set(NanNew<String>("id"),NanNew<Number>(f.id()));
             }
             if (f.has_raster())
             {
                 std::string const& raster = f.raster();
-                feature_obj->Set(NanNew<String>("raster"),node::Buffer::New((char*)raster.data(),raster.size())->handle_);
+                feature_obj->Set(NanNew<String>("raster"), NanNew((char*)raster.data(),raster.size()));
             }
-            feature_obj->Set(NanNew<String>("type"),Integer::New(f.type()));
-            Local<Array> g_arr = Array::New();
+            feature_obj->Set(NanNew<String>("type"),NanNew<Integer>(f.type()));
+            Local<Array> g_arr = NanNew<Array>();
             for (int k = 0; k < f.geometry_size();++k)
             {
                 g_arr->Set(k,NanNew<Number>(f.geometry(k)));
@@ -1289,7 +1289,7 @@ void VectorTile::EIO_AfterParse(uv_work_t* req)
 
 NAN_METHOD(VectorTile::addImage)
 {
-    NanScope()
+    NanScope();
     VectorTile* d = ObjectWrap::Unwrap<VectorTile>(args.This());
     if (args.Length() < 1 || !args[0]->IsObject()){
         return NanThrowError("first argument must be a Buffer representing encoded image data");
@@ -1325,7 +1325,7 @@ NAN_METHOD(VectorTile::addImage)
     d->painted(true);
     // cache modified size
     d->cache_bytesize();
-    return NanUndefined();
+    NanUndefined();
 }
 
 NAN_METHOD(VectorTile::addGeoJSON)
@@ -1526,20 +1526,10 @@ NAN_METHOD(VectorTile::getData)
     try {
         // shortcut: return raw data and avoid trip through proto object
         // TODO  - safe for null string?
-<<<<<<< HEAD
-        int raw_size = d->buffer_.size();
-<<<<<<< HEAD
-        if (d->byte_size_ <= raw_size) {
-            NanReturnValue(NanNewBufferHandle((char*)d->buffer_.data(),raw_size));
-=======
-=======
         int raw_size = static_cast<int>(d->buffer_.size());
->>>>>>> fixup internal handling of cached tile bytesize
         if (raw_size > 0 && d->byte_size_ <= raw_size) {
-            return scope.Close(node::Buffer::New((char*)d->buffer_.data(),raw_size)->handle_);
->>>>>>> fix internal knowledge of vtile cached size after vtile.addImage
+            NanReturnValue(NanNewBufferHandle((char*)d->buffer_.data(),raw_size));
         } else {
-<<<<<<< HEAD
             // NOTE: tiledata.ByteSize() must be called
             // after each modification of tiledata otherwise the
             // SerializeWithCachedSizesToArray will throw:
@@ -1555,27 +1545,6 @@ NAN_METHOD(VectorTile::getData)
                 NanReturnUndefined();
             }
             NanReturnValue(retbuf);
-=======
-            if (d->byte_size_ <= 0) {
-                return scope.Close(node::Buffer::New(0)->handle_);
-            } else {
-                // NOTE: tiledata.ByteSize() must be called
-                // after each modification of tiledata otherwise the
-                // SerializeWithCachedSizesToArray will throw:
-                // Error: CHECK failed: !coded_out.HadError()
-                mapnik::vector::tile const& tiledata = d->get_tile();
-                node::Buffer *retbuf = node::Buffer::New(d->byte_size_);
-                // TODO - consider wrapping in fastbuffer: https://gist.github.com/drewish/2732711
-                // http://www.samcday.com.au/blog/2011/03/03/creating-a-proper-buffer-in-a-node-c-addon/
-                google::protobuf::uint8* start = reinterpret_cast<google::protobuf::uint8*>(node::Buffer::Data(retbuf));
-                google::protobuf::uint8* end = tiledata.SerializeWithCachedSizesToArray(start);
-                if (end - start != d->byte_size_) {
-                    return ThrowException(Exception::Error(
-                                              String::New("serialization failed, possible race condition")));
-                }
-                return scope.Close(retbuf->handle_);
-            }
->>>>>>> fixup internal handling of cached tile bytesize
         }
     } catch (std::exception const& ex) {
         NanThrowError(ex.what());
