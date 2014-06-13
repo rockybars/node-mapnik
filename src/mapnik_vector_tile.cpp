@@ -137,27 +137,7 @@ bool _hit_test(PathType & path, double x, double y, double tol, double & distanc
 Persistent<FunctionTemplate> VectorTile::constructor;
 
 void VectorTile::Initialize(Handle<Object> target) {
-    HandleScope scope;
-    constructor = Persistent<FunctionTemplate>::New(FunctionTemplate::New(VectorTile::New));
-    constructor->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor->SetClassName(String::NewSymbol("VectorTile"));
-    NODE_SET_PROTOTYPE_METHOD(constructor, "render", render);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "setData", setData);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "setDataSync", setDataSync);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "getData", getData);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "parse", parse);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "parseSync", parseSync);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "addData", addData);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "composite", composite);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "query", query);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "names", names);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "toJSON", toJSON);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "toGeoJSON", toGeoJSON);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "addGeoJSON", addGeoJSON);
-    NODE_SET_PROTOTYPE_METHOD(constructor, "addImage", addImage);
-
     NanScope();
-
     Local<FunctionTemplate> lcons = NanNew<FunctionTemplate>(VectorTile::New);
     lcons->InstanceTemplate()->SetInternalFieldCount(1);
     lcons->SetClassName(NanNew("VectorTile"));
@@ -173,8 +153,8 @@ void VectorTile::Initialize(Handle<Object> target) {
     NODE_SET_PROTOTYPE_METHOD(lcons, "names", names);
     NODE_SET_PROTOTYPE_METHOD(lcons, "toJSON", toJSON);
     NODE_SET_PROTOTYPE_METHOD(lcons, "toGeoJSON", toGeoJSON);
-    NODE_SET_PROTOTYPE_METHOD(lcons, "fromGeoJSON", fromGeoJSON);
-
+    NODE_SET_PROTOTYPE_METHOD(lcons, "addGeoJSON", addGeoJSON);
+    NODE_SET_PROTOTYPE_METHOD(lcons, "addImage", addImage);
 #ifdef PROTOBUF_FULL
     NODE_SET_PROTOTYPE_METHOD(lcons, "toString", toString);
 #endif
@@ -486,8 +466,8 @@ NAN_METHOD(VectorTile::composite)
                 mapnik::vector::tile const& tiledata = vt->get_tile();
                 if (!tiledata.SerializeToString(&new_message))
                 {
-                    return ThrowException(Exception::Error(
-                              String::New("could not serialize new data for vt")));
+                    NanThrowError("could not serialize new data for vt");
+                    NanReturnUndefined();
                 }
                 if (!new_message.empty())
                 {
@@ -850,20 +830,15 @@ NAN_METHOD(VectorTile::toJSON)
 
             if (f.has_id())
             {
-                feature_obj->Set(String::NewSymbol("id"),Number::New(f.id()));
+                feature_obj->Set(NanNew("id"),NanNew<Number>(f.id()));
             }
             if (f.has_raster())
             {
                 std::string const& raster = f.raster();
-                feature_obj->Set(String::NewSymbol("raster"),node::Buffer::New((char*)raster.data(),raster.size())->handle_);
+                feature_obj->Set(NanNew("raster"), NanNewBufferHandle((char*)raster.data(),raster.size()));
             }
-            feature_obj->Set(String::NewSymbol("type"),Integer::New(f.type()));
-            Local<Array> g_arr = Array::New();
-/*
-            feature_obj->Set(NanNew("id"),NanNew<Number>(f.id()));
             feature_obj->Set(NanNew("type"),NanNew<Integer>(f.type()));
             Local<Array> g_arr = NanNew<Array>();
-*/
             for (int k = 0; k < f.geometry_size();++k)
             {
                 g_arr->Set(k,NanNew<Number>(f.geometry(k)));
@@ -1317,27 +1292,32 @@ void VectorTile::EIO_AfterParse(uv_work_t* req)
     delete closure;
 }
 
-<<<<<<< HEAD
-Handle<Value> VectorTile::addImage(const Arguments& args)
+NAN_METHOD(VectorTile::addImage)
 {
-    HandleScope scope;
-    VectorTile* d = ObjectWrap::Unwrap<VectorTile>(args.This());
-    if (args.Length() < 1 || !args[0]->IsObject())
-        return ThrowException(Exception::Error(
-                                  String::New("first argument must be a Buffer representing encoded image data")));
-    if (args.Length() < 2 || !args[1]->IsString())
-        return ThrowException(Exception::Error(
-                                  String::New("second argument must be a layer name (string)")));
+    NanScope();
+    VectorTile* d = node::ObjectWrap::Unwrap<VectorTile>(args.Holder());
+
+    if (args.Length() < 1 || !args[0]->IsObject()){
+        NanThrowTypeError("first argument must be a Buffer representing encoded image data");
+        NanReturnUndefined();
+    }
+
+    if (args.Length() < 2 || !args[1]->IsString()){
+        NanThrowTypeError("second argument must be a layer name (string)");
+        NanReturnUndefined();
+    }
+
     std::string layer_name = TOSTR(args[1]);
     Local<Object> obj = args[0]->ToObject();
-    if (obj->IsNull() || obj->IsUndefined() || !node::Buffer::HasInstance(obj))
-        return ThrowException(Exception::Error(
-                                  String::New("first argument must be a Buffer representing encoded image data")));
+    if (obj->IsNull() || obj->IsUndefined() || !node::Buffer::HasInstance(obj)){
+        NanThrowTypeError("first argument must be a Buffer representing encoded image data");
+        NanReturnUndefined();
+    }
     std::size_t buffer_size = node::Buffer::Length(obj);
     if (buffer_size <= 0)
     {
-        return ThrowException(Exception::Error(
-                                  String::New("cannot accept empty buffer as image")));
+        NanThrowTypeError("cannot accept empty buffer as image");
+        NanReturnUndefined();
     }
     // how to ensure buffer width/height?
     mapnik::vector::tile & tiledata = d->get_tile_nonconst();
@@ -1353,11 +1333,10 @@ Handle<Value> VectorTile::addImage(const Arguments& args)
     d->painted(true);
     // cache modified size
     d->cache_bytesize();
-    return Undefined();
-
+    NanReturnUndefined();
 }
-Handle<Value> VectorTile::addGeoJSON(const Arguments& args)
-// NAN_METHOD(VectorTile::fromGeoJSON)
+
+NAN_METHOD(VectorTile::addGeoJSON)
 {
     NanScope();
     VectorTile* d = ObjectWrap::Unwrap<VectorTile>(args.Holder());
@@ -1372,32 +1351,32 @@ Handle<Value> VectorTile::addGeoJSON(const Arguments& args)
     std::string geojson_string = TOSTR(args[0]);
     std::string geojson_name = TOSTR(args[1]);
 
-    Local<Object> options = Object::New();
+    Local<Object> options = NanNew<Object>();
     unsigned tolerance = 1;
     unsigned path_multiplier = 16;
 
     if (args.Length() > 2) {
         // options object
         if (!args[2]->IsObject())
-            return ThrowException(Exception::TypeError(
-                                      String::New("optional third argument must be an options object")));
+            NanThrowTypeError("optional third argument must be an options object");
+            NanReturnUndefined();
 
         options = args[2]->ToObject();
 
-        if (options->Has(String::New("tolerance"))) {
-            Local<Value> param_val = options->Get(String::New("tolerance"));
+        if (options->Has(NanNew("tolerance"))) {
+            Local<Value> param_val = options->Get(NanNew("tolerance"));
             if (!param_val->IsNumber()) {
-                return ThrowException(Exception::TypeError(
-                                          String::New("option 'tolerance' must be an unsigned integer")));
+                NanThrowTypeError("option 'tolerance' must be an unsigned integer");
+                NanReturnUndefined();
             }
             tolerance = param_val->IntegerValue();
         }
 
-        if (options->Has(String::New("path_multiplier"))) {
-            Local<Value> param_val = options->Get(String::New("path_multiplier"));
+        if (options->Has(NanNew("path_multiplier"))) {
+            Local<Value> param_val = options->Get(NanNew("path_multiplier"));
             if (!param_val->IsNumber()) {
-                return ThrowException(Exception::TypeError(
-                                          String::New("option 'path_multiplier' must be an unsigned integer")));
+                NanThrowTypeError("option 'path_multiplier' must be an unsigned integer");
+                NanReturnUndefined();
             }
             path_multiplier = param_val->NumberValue();
         }
@@ -1433,7 +1412,6 @@ Handle<Value> VectorTile::addGeoJSON(const Arguments& args)
         ren.apply();
         d->painted(ren.painted());
         d->cache_bytesize();
-        return True();
         NanReturnValue(NanTrue());
 
     }
@@ -1593,30 +1571,6 @@ NAN_METHOD(VectorTile::getData)
     try {
         // shortcut: return raw data and avoid trip through proto object
         // TODO  - safe for null string?
-<<<<<<< HEAD
-        int raw_size = static_cast<int>(d->buffer_.size());
-        if (raw_size > 0 && d->byte_size_ <= raw_size) {
-            return scope.Close(node::Buffer::New((char*)d->buffer_.data(),raw_size)->handle_);
-        } else {
-            if (d->byte_size_ <= 0) {
-                return scope.Close(node::Buffer::New(0)->handle_);
-            } else {
-                // NOTE: tiledata.ByteSize() must be called
-                // after each modification of tiledata otherwise the
-                // SerializeWithCachedSizesToArray will throw:
-                // Error: CHECK failed: !coded_out.HadError()
-                mapnik::vector::tile const& tiledata = d->get_tile();
-                node::Buffer *retbuf = node::Buffer::New(d->byte_size_);
-                // TODO - consider wrapping in fastbuffer: https://gist.github.com/drewish/2732711
-                // http://www.samcday.com.au/blog/2011/03/03/creating-a-proper-buffer-in-a-node-c-addon/
-                google::protobuf::uint8* start = reinterpret_cast<google::protobuf::uint8*>(node::Buffer::Data(retbuf));
-                google::protobuf::uint8* end = tiledata.SerializeWithCachedSizesToArray(start);
-                if (end - start != d->byte_size_) {
-                    return ThrowException(Exception::Error(
-                                              String::New("serialization failed, possible race condition")));
-                }
-                return scope.Close(retbuf->handle_);
-            }
         int raw_size = d->buffer_.size();
         if (d->byte_size_ <= raw_size) {
             NanReturnValue(NanNewBufferHandle((char*)d->buffer_.data(),raw_size));
