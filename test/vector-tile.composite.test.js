@@ -207,11 +207,11 @@ describe('mapnik.VectorTile.composite', function() {
         try{
             vtile.composite(vtiles,opts);    
             done();
-        } catch(err)
+        } catch(err){
             done(err);
         }
         assert.deepEqual(vtile.names(),[]);
-        
+
         /*assert.deepEqual(vtile.names(),[]);
         vtile.parse(function(err) {
             assert.ok(err);
