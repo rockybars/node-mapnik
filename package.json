@@ -31,9 +31,10 @@
   "contributors": [
     "Konstantin Käfer"
   ],
-  "dependencies"  : {
-      "mapnik-vector-tile": "~0.5.1",
-      "node-pre-gyp":"https://github.com/mapbox/node-pre-gyp/tarball/master"
+  "dependencies": {
+    "mapnik-vector-tile": "~0.5.1",
+    "nan": "^1.2.0",
+    "node-pre-gyp": "https://github.com/mapbox/node-pre-gyp/tarball/master"
   },
   "licenses": [
     {

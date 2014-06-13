@@ -1494,35 +1494,35 @@ NAN_METHOD(Map::render)
         vector_tile_baton_t *closure = new vector_tile_baton_t();
         VectorTile * vector_tile_obj = node::ObjectWrap::Unwrap<VectorTile>(obj);
 
-        if (options->Has(String::New("image_scaling"))) {
-            Local<Value> param_val = options->Get(String::New("image_scaling"));
+        if (options->Has(NanNew("image_scaling"))) {
+            Local<Value> param_val = options->Get(NanNew("image_scaling"));
             if (!param_val->IsString()) {
                 delete closure;
-                return ThrowException(Exception::TypeError(
-                                          String::New("option 'image_scaling' must be an unsigned integer")));
+                NanThrowTypeError("option 'image_scaling' must be an unsigned integer");
+                NanReturnUndefined();
             }
             std::string image_scaling = TOSTR(param_val);
             boost::optional<mapnik::scaling_method_e> method = mapnik::scaling_method_from_string(image_scaling);
             if (!method) {
                 delete closure;
-                return ThrowException(Exception::TypeError(
-                                          String::New("option 'image_scaling' must be a string and a valid scaling method (e.g 'bilinear')")));
+                NanThrowTypeError("option 'image_scaling' must be a string and a valid scaling method (e.g 'bilinear')");
+                NanReturnUndefined();
             }
             closure->scaling_method = *method;
         }
 
-        if (options->Has(String::New("image_format"))) {
-            Local<Value> param_val = options->Get(String::New("image_format"));
+        if (options->Has(NanNew("image_format"))) {
+            Local<Value> param_val = options->Get(NanNew("image_format"));
             if (!param_val->IsString()) {
                 delete closure;
-                return ThrowException(Exception::TypeError(
-                                          String::New("option 'image_format' must be a string")));
+                NanThrowTypeError("option 'image_format' must be a string");
+                NanReturnUndefined();
             }
             closure->image_format = TOSTR(param_val);
         }
 
-        if (options->Has(String::New("tolerance"))) {
-            Local<Value> param_val = options->Get(String::New("tolerance"));
+        if (options->Has(NanNew("tolerance"))) {
+            Local<Value> param_val = options->Get(NanNew("tolerance"));
 
             if (!param_val->IsNumber()) {
                 delete closure;
