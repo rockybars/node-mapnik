@@ -1292,7 +1292,7 @@ void VectorTile::EIO_AfterParse(uv_work_t* req)
     delete closure;
 }
 
-NAN_METHOD(addImage)
+NAN_METHOD(VectorTile::addImage)
 {
     NanScope();
     VectorTile* d = node::ObjectWrap::Unwrap<VectorTile>(args.Holder());
@@ -1334,7 +1334,6 @@ NAN_METHOD(addImage)
     // cache modified size
     d->cache_bytesize();
     NanReturnUndefined();
-
 }
 
 NAN_METHOD(VectorTile::addGeoJSON)
