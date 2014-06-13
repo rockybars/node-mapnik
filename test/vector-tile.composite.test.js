@@ -206,11 +206,26 @@ describe('mapnik.VectorTile.composite', function() {
         var opts = {buffer_size:-256}; // will lead to dropped data
         try{
             vtile.composite(vtiles,opts);    
-            done();
         } catch(err){
-            done(err);
+            return done(err);
         }
         assert.deepEqual(vtile.names(),[]);
+        vtile.parse(function(err) {
+            assert.ok(err);
+            assert.equal(err.message,'cannot parse 0 length buffer as protobuf');
+            
+            var json_result = vtile.toJSON();
+            assert.equal(json_result.length,0);
+            var map = new mapnik.Map(256,256);
+            
+            try{
+                map.loadSync(data_base +'/styles/all.xml');    
+            }catch(err){
+                return done(err);
+            }
+            
+            done();
+        }
 
         /*assert.deepEqual(vtile.names(),[]);
         vtile.parse(function(err) {
