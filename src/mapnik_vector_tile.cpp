@@ -338,7 +338,7 @@ NAN_METHOD(VectorTile::composite)
         NanThrowTypeError("must provide an array of VectorTile objects and an optional options object");
         NanReturnUndefined();
     }
-    Local<Array> vtiles = args[0].As<Array>();
+    Local<Array> vtiles = Local<Array>::Cast(args[0]);
     unsigned num_tiles = vtiles->Length();
     if (num_tiles < 1) {
         NanThrowTypeError("must provide an array with at least one VectorTile object and an optional options object");
