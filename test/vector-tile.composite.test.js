@@ -203,7 +203,7 @@ describe('mapnik.VectorTile.composite', function() {
     it('should render with custom buffer_size', function(done) {
         var vtile = new mapnik.VectorTile(2,1,1);
         var vtiles = [get_tile_at('lines',[0,0,0]),get_tile_at('points',[1,1,1])]
-        var opts = {buffer_size:-256}; // will lead to dropped data
+        var opts = {buffer_size:0}; // will lead to dropped data
         vtile.composite(vtiles,opts);
         assert.deepEqual(vtile.names(),[]);
         vtile.parse(function(err) {
