@@ -80,7 +80,7 @@ public:
         return tiledata_;
     }
     void cache_bytesize() {
-        // byte_size_ = tiledata_.ByteSize();
+        byte_size_ = tiledata_.ByteSize();
     }
     void painted(bool painted) {
         painted_ = painted;
