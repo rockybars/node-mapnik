@@ -397,7 +397,6 @@ NAN_METHOD(VectorTile::composite)
                 NanReturnUndefined();
             }
             buffer_size = bind_opt->IntegerValue();
-            std::cout << "buffer_size: " << buffer_size << std::endl;
         }
         if (options->Has(NanNew("scale"))) {
             Local<Value> bind_opt = options->Get(NanNew("scale"));
@@ -500,6 +499,7 @@ NAN_METHOD(VectorTile::composite)
             // ensure data is in tile object
             if (vt->status_ == LAZY_DONE) // tile is already parsed, we're good
             {
+                std::cout << buffer_size << " LAZY_DONE";
                 mapnik::vector::tile const& tiledata = vt->get_tile();
                 unsigned num_layers = tiledata.layers_size();
                 if (num_layers > 0)
@@ -532,6 +532,7 @@ NAN_METHOD(VectorTile::composite)
             }
             else // tile is not pre-parsed so parse into new object to avoid needing to mutate input
             {
+                std::cout << buffer_size << " not pre-parsed";
                 std::size_t bytes = vt->buffer_.size();
                 if (bytes > 1) // throw instead?
                 {

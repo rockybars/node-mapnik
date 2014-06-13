@@ -204,7 +204,12 @@ describe('mapnik.VectorTile.composite', function() {
         var vtile = new mapnik.VectorTile(2,1,1);
         var vtiles = [get_tile_at('lines',[0,0,0]),get_tile_at('points',[1,1,1])]
         var opts = {buffer_size:-256}; // will lead to dropped data
-        vtile.composite(vtiles,opts);
+        try{
+            vtile.composite(vtiles,opts);    
+        } catch(err){
+            done(err);
+        }
+        
         assert.deepEqual(vtile.names(),[]);
         vtile.parse(function(err) {
             assert.ok(err);
