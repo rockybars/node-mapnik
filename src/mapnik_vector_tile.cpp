@@ -397,6 +397,7 @@ NAN_METHOD(VectorTile::composite)
                 NanReturnUndefined();
             }
             buffer_size = bind_opt->IntegerValue();
+            std::cout << "buffer_size: " << buffer_size << std::endl;
         }
         if (options->Has(NanNew("scale"))) {
             Local<Value> bind_opt = options->Get(NanNew("scale"));

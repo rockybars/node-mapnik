@@ -218,6 +218,8 @@ describe('mapnik.VectorTile.composite', function() {
                 if (err) throw err;
                 var actual = im.encodeSync('png32');
                 var expected_file = data_base +'/expected/2-1-1-empty.png';
+                console.log (actual);
+                console.log (expected_file);
                 assert.ok(compare_to_image(actual,expected_file));
                 done();
             })
