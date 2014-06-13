@@ -215,7 +215,7 @@ describe('mapnik.VectorTile.composite', function() {
             assert.equal(err.message,'cannot parse 0 length buffer as protobuf');
             
             var json_result = vtile.toJSON();
-            assert.equal(json_result.length,0);
+            assert.equal(json_result.length, 0);
             var map = new mapnik.Map(256,256);
             
             try{
@@ -223,9 +223,9 @@ describe('mapnik.VectorTile.composite', function() {
             }catch(err){
                 return done(err);
             }
-            
+
             done();
-        }
+        });
 
         /*assert.deepEqual(vtile.names(),[]);
         vtile.parse(function(err) {
